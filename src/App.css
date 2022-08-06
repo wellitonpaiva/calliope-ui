@@ -17,7 +17,8 @@
 .textfield {
   display: flex;
   align-items: center;
-  
+  width: 80%;
+  min-height: 50vh;
 }
 
 .duplicated {

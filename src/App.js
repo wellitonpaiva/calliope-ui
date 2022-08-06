@@ -2,6 +2,9 @@ import React from 'react'
 import './App.css'
 import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button';
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import { Typography, Container, Grid, Chip} from '@mui/material';
 
 class App extends React.Component {
 
@@ -11,11 +14,16 @@ class App extends React.Component {
       text: '', 
       result: '',
       duplications: [],
-      uniqueElements: []
+      uniqueElements: [],
+      inputMode: true,
+      highlightWord: ''
     }
 
     this.handleText = this.handleText.bind(this)
-    this.handleClick = this.handleClick.bind(this)
+    this.handleRevise = this.handleRevise.bind(this)
+    this.handleDelete = this.handleDelete.bind(this)
+    this.handleReturn = this.handleReturn.bind(this)
+    
   }
 
   handleText(e) {
@@ -23,9 +31,18 @@ class App extends React.Component {
 
   }
 
-  handleClick() {
+  handleHighlight(e) {
+    this.setState({highlightWord: e})
+  }
+
+  handleDelete(text) {
+
+  }
+
+  handleRevise() {
     let resultHtml = "";
     const duplications = this.findDuplication(this.state.text)  
+    this.setState({duplications: duplications})
     this.state.text.split(' ').map(word => {
       if(duplications.find(w => w === word)) {
         resultHtml += "<p class='duplicated result'>" + word +" &nbsp;</p>"
@@ -33,7 +50,12 @@ class App extends React.Component {
         resultHtml += "<p class='result'>" + word +"&nbsp;</p>"
       }
     })
-    this.setState({result: resultHtml})
+    this.setState({result: resultHtml, inputMode: false})
+    
+  }
+
+  handleReturn() {
+    this.setState({result: "", inputMode: true})
   }
 
   findDuplication(str) {
@@ -53,25 +75,47 @@ class App extends React.Component {
   render() {
     return (
       <div className="App">
-        <header className="App-header">
-            <h1>Calliope</h1>
-            <h2>Revisor de textos</h2>
-          </header>
-          <main className="App-main">
+        <AppBar position="static">
+          <Container maxWidth="xl">
+            <Toolbar disableGutters>
+              <Typography variant="h6" noWrap>C A L L I O P E</Typography>
+            </Toolbar>
+          </Container>
+        </AppBar>
+        <Grid container spacing={2}>
+          <Grid item xs={10}>
+            {this.state.inputMode ? 
+              <div>
+                <TextField id="text" 
+                  placeholder="Insira seu texto aqui" 
+                  value={this.state.text}
+                  onChange={this.handleText}
+                  fullWidth
+                  minRows='10'
+                  multiline/>
+                <Button variant="outlined" onClick={this.handleRevise}>Revisar</Button>
+              </div>
+            : 
             <div>
-              <TextField id="text" 
-                className="textfield" 
-                label="Insira seu texto aqui" 
-                placeholder="Insira seu texto aqui" 
-                value={this.state.text}
-                onChange={this.handleText}
-                multiline/>
-              <Button variant="outlined" onClick={this.handleClick}>Revise</Button>
+              
+              <div>
+                {this.state.text.split(' ').map(word => 
+                  <p className={word === this.state.highlightWord ? 'duplicated result' : 'result'}>{word}&nbsp;</p>)}
+              </div>
+              <Button variant="outlined" onClick={this.handleReturn}>Retornar</Button>
             </div>
-            <div>
-              <p className='result' dangerouslySetInnerHTML={{__html: this.state.result}}></p>
-            </div>
-          </main>
+            }
+          </Grid>
+          <Grid item xs={2}>
+            <div>Palavras Repetidas</div>
+            {this.state.duplications.map(word => 
+              <Chip label={word} variant="outlined" onClick={() => this.handleHighlight(word)}/>
+            )}
+          </Grid>
+        </Grid>
+          
+        
+        
       </div>
     )
   }
